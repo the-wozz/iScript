@@ -7,7 +7,7 @@ apiID=""
 apiPassword=''
 
 ## Global Variables ##
-#machineSerial=$(system_profiler SPHardwareDataType | grep Serial |  awk '{print $NF}' )
+machineSerial=$(system_profiler SPHardwareDataType | grep Serial |  awk '{print $NF}' )
 #currentUser=$(who | awk '/console/{print $1}')
 bearerToken=""
 jamfProID=""
@@ -49,8 +49,7 @@ fi
 
 ## Main Body Log ##
 getBearerToken
-jamfProID=$(jamf recon | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' -)
-#jamfProID=$(curl -H "Accept: text/xml" -sfku "${apiID}:${apiPassword}" "${jssURL}/JSSResource/computers/serialnumber/${machineSerial}/subset/general" | xpath '/computer/general/id/text()')
+jamfProID=$(curl -H "accept: application/xml" -H "Authorization: Bearer ${bearerToken}" -X GET "${jssURL}/JSSResource/computers/serialnumber/${machineSerial}/subset/general" | awk -F '<id>' '{print $2}' | awk -F '<' '{print $1}' )
 curl -X POST "${jssURL}/api/v1/computers-inventory/${jamfProID}/attachments" -H "Authorization: Bearer ${bearerToken}" -F file=@/private/tmp/$new_fileName.zip
      
 ## Cleanup ##
